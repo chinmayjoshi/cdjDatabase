@@ -6,7 +6,7 @@ class Database {
     filename = null;
     name = null;
     data = null;
-    
+
     constructor(name) {
         this.name = name;
         this.filename = `./${name}.cdj`;
@@ -21,6 +21,19 @@ class Database {
     insertRow(tableName, data) {
         this.data[tableName].insertRow(data);
     }
+
+    insertMultipleRows(tableName, rows) {
+        this.data[tableName].insertMultipleRows(rows);
+    }
+
+    getRows(tableName) {
+        return this.data[tableName].getRows();
+    }
+
+    getRowsWithFilter(tableName, filterCriteria) {
+        return this.data[tableName].getRowsWithFilter(filterCriteria);
+    }
+
 
 
 }
