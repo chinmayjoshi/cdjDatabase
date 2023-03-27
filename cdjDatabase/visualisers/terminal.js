@@ -2,8 +2,12 @@ class Terminal {
 
     static printRows(rows) {
         for (let row of rows) {
-            console.log(row.data);
+            this.printRow(row);
         }
+    }
+
+    static printRow(row) {
+        console.log(row.data);
     }
 
 }

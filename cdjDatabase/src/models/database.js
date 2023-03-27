@@ -1,4 +1,7 @@
 import Table from './table.js';
+import fs from 'fs';
+import init from '../init.js';
+
 
 class Database {
     //file for persistance
@@ -11,6 +14,7 @@ class Database {
         this.name = name;
         this.filename = `./${name}.cdj`;
         this.data = {};
+        init(this);
     }
 
     createTable(name,columns) {
@@ -32,6 +36,16 @@ class Database {
 
     getRowsWithFilter(tableName, filterCriteria) {
         return this.data[tableName].getRowsWithFilter(filterCriteria);
+    }
+
+    persistOnDisk() {
+        fs.writeFile(this.filename, JSON.stringify(this.data), (err) => {
+            if (err) {
+                throw err;
+            }
+            console.log("Data written to file");
+        });
+        
     }
 
 
