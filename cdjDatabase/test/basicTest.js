@@ -1,7 +1,7 @@
 import Database from "../src/models/database.js";
 import Terminal from "../visualisers/terminal.js";
 import { faker } from '@faker-js/faker';
-
+ 
 
 
 function tests() {
