@@ -1,6 +1,6 @@
-var constants = {
-    "baseLocation": "/Users/oyo/Documents/Apis/SqlDatabase",
+var constants = Object.freeze({
+    "baseLocation": "/SqlDatabase",
     "types": ["string","number"],
-}
+});
 
 export default constants;

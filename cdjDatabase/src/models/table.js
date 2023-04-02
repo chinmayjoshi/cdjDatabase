@@ -21,6 +21,8 @@ class Table {
 
     insertRow(data) {
         if (data.length != this.columns.length) {
+            console.log(data)
+            console.log(this.columns)
             throw new Error("Invalid row length");
         }
 
