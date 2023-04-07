@@ -1,7 +1,8 @@
 import constants from '../constants.js';
 class Column {
+    is_primary = false;
 
-    constructor(name, type) {
+    constructor(name, type , is_primary = false) {
        
         if(this.validateType(type)) {
             this.type = type;
@@ -12,6 +13,7 @@ class Column {
         }
 
         this.name = name;
+        this.is_primary = is_primary;
         
     }
 

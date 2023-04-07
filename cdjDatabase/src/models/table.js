@@ -5,25 +5,46 @@ class Table {
     rows = [];
     name = "";
     columns = [];
+    filename = null;
+    primaryKeyUniqueIndex = [];
+    primaryKeyColumnLocation = 0;
 
-    constructor(name, columns) {
+    constructor(name, columns ,primaryKeyColumnLocation = 0, primaryKeyUniqueIndex = []) {
         this.name = name;
+        let i =0;
         for (let column of columns) {
             try {
+                if(column.is_primary == undefined){
                 column = new Column(column.name, column.type);
+                }
+                else {
+                    column = new Column(column.name, column.type, column.is_primary);
+                    if(column.is_primary) {
+                        this.primaryKeyColumnLocation = i;
+                    }
+                }
             }
             catch (e) {
                 throw e;
             }
             this.columns.push(column);
+            i++;
         }
+        //Tables now have to be unique across databases
+        this.filename = `/${name}` + "_table.cdj";
     }
 
     insertRow(data) {
         if (data.length != this.columns.length) {
-            console.log(data)
-            console.log(this.columns)
             throw new Error("Invalid row length");
+        }
+
+        let primaryKeyInRow = data[this.primaryKeyColumnLocation];
+        if (this.primaryKeyUniqueIndex.includes(primaryKeyInRow)) {
+            throw new Error("Violates unique constraint on primary key");
+        }
+        else {
+            this.primaryKeyUniqueIndex.push(primaryKeyInRow);
         }
 
         let row = new Row(data);
@@ -45,6 +66,15 @@ class Table {
             this.insertRow(row);
         }
     }
+    
+
+    getPrimaryKey() {
+        for (let column of this.columns) {
+            if (column.is_primary) {
+                return column;
+            }
+        }
+    }
 
     //Select * from table
 
@@ -57,16 +87,25 @@ class Table {
     getRowsWithFilter(filterCriteria) {
         let filteredRows = [];
         for (let row of this.rows) {
-            if (this.#filter(row,filterCriteria)) {
+            if (this.filter(row,filterCriteria)) {
                 filteredRows.push(row);
             }
         }
         return filteredRows;
     }
 
+    getColumnLocation(columnName) {
+        let index = this.columns.findIndex((column) => column.name == columnName);
+        if (index == -1) {
+            throw new Error("Invalid column name");
+        }
+        return index;
+    }
+
+
     //Private methods
 
-    #filter(row,filters) {
+    filter(row,filters) {
 
         for (let key in filters) {
             
