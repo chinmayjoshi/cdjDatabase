@@ -4,6 +4,7 @@ import InitializationService from '../services/init.js';
 import constants from '../constants.js';
 import appRootPath from 'app-root-path';
 import Row from './row.js';
+import Column from './column.js';
 
 
 class Database {
@@ -73,39 +74,11 @@ class Database {
         let leadingHalf = "";
 
         readStream.on('data', (chunk) => {
-            //break chunk into rows
-            let rows = chunk.split("\n");
-            let i =0;
 
-            for(let row of rows) {
-                try {
-                    let data = JSON.parse(row);
-                    //Creation of row object should happen in a method of row class
-                    let rowObject = new Row(data);
-                    this.filterOrAggregate(tableName, filterCriteria, aggregateColumn, aggregateOperation, rowObject,aggregateResult);
-                }
-                catch(err) {
-                    //Handle corner case where row is split across two chunks
+            //Will create a Util and move these methods there
+            let rows = this.splitChunkIntoRows(chunk);
+            this.processRows(tableName,rows, filterCriteria, aggregateColumn, aggregateOperation, aggregateResult, leadingHalf);
 
-                    if(i == 0) {
-                        row = leadingHalf + row;
-                        try {
-                            let rowObject = new Row(JSON.parse(row));
-                            this.filterOrAggregate(tableName, filterCriteria, aggregateColumn, aggregateOperation, rowObject,aggregateResult);
-
-                        }
-                        catch(err) {
-                            //Do nothing
-                        }
-                        
-                    }
-                    if(i == rows.length - 1) {
-                        leadingHalf = row;
-                    }
-                }
-
-            i++; 
-            }
         });
         
         readStream.on('end', () => {
@@ -122,6 +95,50 @@ class Database {
 
     }
 
+    //Helper functions
+
+    splitChunkIntoRows(chunk) {
+        let rows = chunk.split("\n");
+        return rows;
+    }
+
+    processRows(tableName,rows, filterCriteria, aggregateColumn, aggregateOperation, aggregateResult, leadingHalf) {
+
+        let i =0;
+        
+        for(let row of rows) {
+            try {
+                let data = JSON.parse(row);
+                //Creation of row object should happen in a method of row class
+                let rowObject = new Row(data);
+                this.filterOrAggregate(tableName, filterCriteria, aggregateColumn, aggregateOperation, rowObject,aggregateResult);
+            }
+            catch(err) {
+                //Handle corner case where row is split across two chunks
+
+                if(i == 0) {
+                    row = leadingHalf + row;
+                    try {
+                        let rowObject = new Row(JSON.parse(row));
+                        this.filterOrAggregate(tableName, filterCriteria, aggregateColumn, aggregateOperation, rowObject,aggregateResult);
+
+                    }
+                    catch(err) {
+                        //Do nothing
+                    }
+                    
+                }
+                if(i == rows.length - 1) {
+                    leadingHalf = row;
+                }
+            }
+
+        i++; 
+        }
+    }
+
+    
+
     //Read from columnar file
     getRowsWithFilterAndAggregateColumnImplementation(tableName, filterCriteria, aggregateColumn = null, aggregateOperation = null) {
         let directoryName = appRootPath + constants.baseLocation + "/" + tableName;
@@ -133,7 +150,23 @@ class Database {
             let aggregateResult = {value: 0};
 
             readStream.on('data', (chunk) => {
+                let rows = this.splitChunkIntoRows(chunk);
                 
+                for(let row of rows) {
+                    try {
+                        let data = row.split(" ");
+                        //Filter and aggregate 
+                        if(aggregateColumn != null && aggregateOperation != null) {
+                            if(aggregateOperation == "sum") {
+                                aggregateResult.value += parseInt(data[1]);
+                            }
+                        }
+                    }
+                    catch(err) {
+                        //Do nothing
+                    }
+                }
+
             });
 
             readStream.on('end', () => {
@@ -175,12 +208,10 @@ class Database {
                 console.log(rowObject.data);
             }
         }
+
     }
 
     deserialize(data) {
-
-            //Using insert row method from database to deserialize data is a problem because it basically reappends the data to the file
-
             //skip if data is empty
             if (Object.keys(data).length === 0) {
                 this.data = {};
@@ -225,6 +256,7 @@ class Database {
         
     }
 
+    //Write to row-wise structure on disk
     appendToFile(tableName, data) {
         console.log("Appending to file");
         let directoryName = appRootPath + constants.baseLocation + "/" + tableName
@@ -244,6 +276,9 @@ class Database {
 
     }
 
+    /*
+    * Write to columnar structure on disk
+    */
     appendColumnarToFile(tableName, data) {
  
         let directoryName = appRootPath + constants.baseLocation + "/" + tableName;

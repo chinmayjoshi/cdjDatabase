@@ -15,28 +15,30 @@ function readTestRowStructure(dbname,tableName){
 function readTestColumnStructure(dbname,tableName){
     let db = new Database(dbname);
     let rows = db.getRows(tableName);
-    db.getRowsWithFilterAndAggregateColumnImplementation(tableName, {age:{value :75 ,operation : "greater"}});
+    db.getRowsWithFilterAndAggregateColumnImplementation(tableName, {age:{value :1 ,operation : "greater"}});
 
 }
 function readTestAggregate(dbname,tableName ){
     let db = new Database(dbname);
-    db.getRowsWithFilterAndAggregateRowImplementation(tableName, {age:{value :30 ,operation : "greater"}},"age","sum");
+    db.getRowsWithFilterAndAggregateRowImplementation(tableName, {age:{value :1 ,operation : "greater"}},"age","sum");
     console.log("Rows count " + db.getRows(tableName).length);
-
-    
-
 }
 
-// Create a higher order that takes in a function and calculates the time taken to execute the function
+function readTestColumnarAggregate(dbname,tableName ){
+    let db = new Database(dbname);
+    db.getRowsWithFilterAndAggregateColumnImplementation(tableName, {age:{value :1 ,operation : "greater"}},"age","sum");
+}
+
 
 
 
 
 // readTestRowStructure();
+
+//Fixed test - do not change - {value: 4037}
 readTestAggregate("testdb5","test");
 
-// timeTaken(readTestAggregate);
+readTestColumnarAggregate("testdb5","test");
 
-// sum  688710
-// 729364
+
 
