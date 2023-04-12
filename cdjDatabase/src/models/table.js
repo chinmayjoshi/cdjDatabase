@@ -108,34 +108,43 @@ class Table {
     filter(row,filters) {
 
         for (let key in filters) {
-            
             let index = this.columns.findIndex((column) => column.name == key);
             if (index == -1) {
                 throw new Error("Invalid filter criteria");
             }
+            if(this.filterOnColumn(row.data[index],filters[key]) == false) {
+                return false;
+            }
 
-            if(filters[key]["operation"] == "equals") {
-                    if (row.data[index] != filters[key]["value"]) {
+        }
+        return true;
+    }
+
+    filterOnColumn(columnData, filterOnColumn) {
+        
+
+            if(filterOnColumn["operation"] == "equals") {
+                    if (columnData != filterOnColumn["value"]) {
                         return false;
                     }
             }
-            else if(filters[key]["operation"] == "greater") {
-                if (row.data[index] <= filters[key]["value"]) {
+            else if(filterOnColumn["operation"] == "greater") {
+                if (columnData <= filterOnColumn["value"]) {
                     return false;
                 }
             }
-            else if(filters[key]["operation"] == "less") {
-                if (row.data[index] >= filters[key]["value"]) {
+            else if(filterOnColumn["operation"] == "less") {
+                if (columnData >= filterOnColumn["value"]) {
                     return false;
                 }
             }
             else {
                 throw new Error("Invalid operation");
             }
-
-        }
-        return true;
+            
+            return true;
     }
+    
 
     }
 

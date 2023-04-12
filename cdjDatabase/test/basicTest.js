@@ -39,4 +39,24 @@ function tests() {
     
 }
 
-tests();
+function createDBandTable(dbname, tableName, columns,rowCount) {
+    let db = new Database(dbname);
+    db.createTable(tableName, columns);
+    let largestId = db.data[tableName].getRows().reduce((max, row) => row.data[0] > max ? row.data[0] : max, 0);
+    for (let i = 1; i < rowCount; i++) {
+        db.insertRow(tableName, [largestId + i, faker.name.firstName(),Math.ceil(Math.random()* 80),faker.address.streetAddress(),
+        faker.lorem.paragraph(),Math.ceil(Math.random()* 100000),faker.address.city(),faker.address.country()]);
+    }
+    return db;
+    
+}
+
+// tests();
+
+
+let columns = [{"name":"id","type":"number","is_primary":1},{"name":"name","type":"string"}, 
+{"name":"age","type":"number"}, {"name":"address","type":"string"}, {"name":"description","type":"string"},
+{"name":"salary","type":"number"}, {"name":"city","type":"string"}, {"name":"country","type":"string"},
+];
+
+createDBandTable("bigDataTest3", "wideTable3",columns,50000);
