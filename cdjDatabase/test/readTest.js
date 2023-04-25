@@ -1,9 +1,6 @@
 //Depends on db and table already existing 
 import Database from "../src/models/database.js";
-// I can create three scenarios for 
-// Filter and return all columns 
-// Filter and return specific columns
-// Aggregate over a column and return the result
+
 
 function readTestRowStructure(dbname,tableName){
     let db = new Database(dbname);
@@ -35,32 +32,30 @@ async function readTestColumnarAggregate(dbname,tableName,filter,aggregateColumn
 }
 
 
-
-
-
-
-
-
-
 let filter = {age:{value :18 ,operation : "greater"}, salary:{value : 10000, operation : "greater"}};
 
 let dbname = "bigDataTest";
 let tableName = "wideTable";
+let aggregateColumn = "salary";
+let aggregateOperation = "sum";
 
-console.log("Inputs are " + dbname + " " + tableName + " " + JSON.stringify(filter));
+// Test 1 
 
-await readTestAggregate(dbname,tableName,filter,"salary","sum");
+// console.log("Inputs are " + dbname + " " + tableName + " " + JSON.stringify(filter) + " " + aggregateColumn + " " + aggregateOperation);
 
-await readTestColumnarAggregate(dbname,tableName,filter,"salary","sum");
+// await readTestAggregate(dbname,tableName,filter,aggregateColumn,aggregateOperation);
+// await readTestColumnarAggregate(dbname,tableName,filter,aggregateColumn,aggregateOperation);
 
-//Higher order function to time the execution of a function
+// Test 2 
 
-function timeFunction(func, args) {
-    let start = new Date().getTime();
-    func(args);
-    let end = new Date().getTime();
-    return end - start;
-}
+filter = {age:{value :30 ,operation : "greater"}}
+console.log("Inputs are " + dbname + " " + tableName + " " + JSON.stringify(filter) + " " + aggregateColumn + " " + aggregateOperation);
+
+await readTestAggregate(dbname,tableName,filter,"age","count");
+await readTestColumnarAggregate(dbname,tableName,filter,"age","count");
+
+
+
 
 
 

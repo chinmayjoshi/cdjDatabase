@@ -218,7 +218,7 @@ class Database {
         }
 
 
-        // wait for all read streams to finish
+        // wait for all read streams of all column files to finish
         await Promise.all(promises);
 
         let intersection = filteredIds.reduce((a, b) => a.filter(c => b.includes(c)));
